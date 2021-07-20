@@ -7,6 +7,9 @@ import { Formik } from 'formik';
 //  Icons
 import {Octicons, Ionicons, Fontisto} from '@expo/vector-icons';
 
+//  API CLIENT axios
+import axios from 'axios';
+
 import {
     StyledContainer,
     InnerContainer,
@@ -28,7 +31,7 @@ import {
     TextLink,
     TextLinkContent
 } from '../components/styles';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 
 //  Colors
 const { brand, darkLigth, primary } = Colors;
@@ -36,8 +39,43 @@ const { brand, darkLigth, primary } = Colors;
 //  Keyboard avoiding Wrapper
 import KeyboardAvoidingWrapper from '../components/keyboardAvoidingWrapper';
 
-const Login = ({navigation}) => {
+const Login = ({ navigation }) => {
     const [hidePassword, setHidePassword] = useState(true);
+    const [message, setMesagge] = useState();
+    const [messageType, setMessageType] = useState();
+
+    const handleLogin = (credentials, setSubmitting) => {
+        handleMessage(null);
+        const url = 'http://10.0.2.2:3001/api/auth/singin';
+        axios
+            .post(url, credentials)
+            .then((response) => {
+                const result = response.data;
+                const {message, status, user, token} = result;
+
+                if (status !== 'SUCCESS') {
+                    handleMessage(message, status);
+                } else {
+                    navigation.navigate('Welcome', { ...user});
+                }
+                setSubmitting(false);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    setSubmitting(false);
+                    handleMessage(error.response.data.message);
+                } else if (error.request) {
+                    setSubmitting(false);
+                    console.log(error.request);
+                    handleMessage("An error ocurred, please check your network and try again");
+                }
+        })
+    }
+
+    const handleMessage = (message, type = 'FAILED') => {
+        setMesagge(message);
+        setMessageType(type);
+    }
 
     return (
         <KeyboardAvoidingWrapper>
@@ -49,24 +87,27 @@ const Login = ({navigation}) => {
                 <SubTitle>Account Login</SubTitle>
 
                 <Formik
-                    initialValues={{email: '', password: ''}}
-                    onSubmit={(values) => {
-                        console.log(values);
-                        navigation.navigate("Welcome");
+                    initialValues={{username: '', password: ''}}
+                    onSubmit={(values, {setSubmitting}) => {
+                       if (values.username == '' || values.password == '') {
+                           handleMessage('Please fill all the fields.');
+                           setSubmitting(false);
+                       } else {
+                           handleLogin(values, setSubmitting);
+                       }
                     }}
                 >
-                    { ( { handleChange, handleBlur, handleSubmit, values } ) => 
+                    { ( { handleChange, handleBlur, handleSubmit, values, isSubmitting } ) => 
                     (<StyledFormArea>
 
                         <MyTextInput 
-                            label="Email Addres"
-                            icon="mail"
-                            placeholder="example@mail.com"
+                            label="Username"
+                            icon="person"
+                            placeholder="pfernandez"
                             placeholderTextColor={darkLigth}
-                            onChangeText={handleChange('email')}
-                            onBlur={handleBlur('email')}
-                            value={values.email}
-                            keyBoardType="email-addres"
+                            onChangeText={handleChange('username')}
+                            onBlur={handleBlur('username')}
+                            value={values.username}
                         />
 
                         <MyTextInput 
@@ -82,10 +123,16 @@ const Login = ({navigation}) => {
                             hidePassword={hidePassword}
                             setHidePassword={setHidePassword}
                         />
-                        <MsgBox>...</MsgBox>
-                        <StyledButtom onPress={handleSubmit}>
+                        <MsgBox type={messageType} >{message}</MsgBox>
+
+                        {!isSubmitting && <StyledButtom onPress={handleSubmit}>
                             <ButtomText>Login</ButtomText>
-                        </StyledButtom>
+                        </StyledButtom>}
+
+                        {isSubmitting && <StyledButtom disabled={true}>
+                            <ActivityIndicator size='large' color={primary} />
+                        </StyledButtom>}
+
                         <Line />
                         <StyledButtom google={true} onPress={handleSubmit}>
                             <Fontisto name={'google'} color={primary} size={25} />
