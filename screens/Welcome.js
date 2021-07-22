@@ -15,7 +15,8 @@ import {
 } from '../components/styles';
 
 const Welcome = ({navigation, route}) => {
-    const { username, email } = route.params;
+    const { username, email, photoUrl } = route.params;
+    const AvatarImg = photoUrl ? {uri: photoUrl} : require('../assets/img/bookstorefondo.png');
     return (
         <>
             <StatusBar style='light' />
@@ -27,7 +28,7 @@ const Welcome = ({navigation, route}) => {
                     <SubTitle welcome={true} >{email || 'test@test.com'}</SubTitle>
 
                     <StyledFormArea>
-                        <Avatar resizeMode="cover" source={require('../assets/img/bookstore.png')} />
+                        <Avatar resizeMode="cover" source={AvatarImg} />
                         <Line />
                             <StyledButtom onPress={() => {navigation.navigate('Login')}}>
                                 <ButtomText>Logout</ButtomText>

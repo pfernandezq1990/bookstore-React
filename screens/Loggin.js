@@ -10,6 +10,9 @@ import {Octicons, Ionicons, Fontisto} from '@expo/vector-icons';
 //  API CLIENT axios
 import axios from 'axios';
 
+//  Google sign in
+import * as Google from 'expo-google-app-auth';
+
 import {
     StyledContainer,
     InnerContainer,
@@ -43,6 +46,7 @@ const Login = ({ navigation }) => {
     const [hidePassword, setHidePassword] = useState(true);
     const [message, setMesagge] = useState();
     const [messageType, setMessageType] = useState();
+    const [googleSubmitting, setGoogleSubmitting] = useState(false);
 
     const handleLogin = (credentials, setSubmitting) => {
         handleMessage(null);
@@ -75,6 +79,35 @@ const Login = ({ navigation }) => {
     const handleMessage = (message, type = 'FAILED') => {
         setMesagge(message);
         setMessageType(type);
+    }
+
+    const handleGoogleSignin = () => {
+        setGoogleSubmitting(true);
+        const config = { 
+            iosClientId: `709020585375-79cppvabvklenjlijevfeoda7h542kbv.apps.googleusercontent.com`,
+            androidClientId: `709020585375-b1mr5i2nkcp31clrq44bjvu5ooukj7ai.apps.googleusercontent.com`,
+            scopes: ['profile', 'email']
+        };
+
+        Google
+            .logInAsync(config)
+            .then( (result) => {
+                const {type, user} = result;
+
+                if (type == 'success' ) {
+                    const {email, name, phtoUrl} = user;
+                    handleMessage('Google signin successfull', 'SUCCESS');
+                    setTimeout(() => navigation.navigate('Welcome', {email, name, phtoUrl}), 1000);
+                } else {
+                    handleMessage('Google sign up was canceled.');
+                }
+                setGoogleSubmitting(false);
+            } )
+            .catch( error => {
+                console.log(error);
+                handleMessage('An error occurred. Check your network and try again.');
+                setGoogleSubmitting(false);
+            })
     }
 
     return (
@@ -133,11 +166,20 @@ const Login = ({ navigation }) => {
                             <ActivityIndicator size='large' color={primary} />
                         </StyledButtom>}
 
-                        <Line />
-                        <StyledButtom google={true} onPress={handleSubmit}>
+                        <Line />                        
+
+                        {!googleSubmitting && (
+                            <StyledButtom google={true} onPress={handleGoogleSignin}>
                             <Fontisto name={'google'} color={primary} size={25} />
                             <ButtomText google={true} >Sign In with Google</ButtomText>
                         </StyledButtom>
+                        )}
+
+                        {googleSubmitting && (
+                            <StyledButtom google={true} disabled={true} >
+                                <ActivityIndicator size='large' color={primary} />
+                        </StyledButtom>
+                        )}
                         <ExtraView>
                             <ExtraText>Don´t have an account already ? </ExtraText>                        
                             <TextLink onPress={() => navigation.navigate("Signup")} >
