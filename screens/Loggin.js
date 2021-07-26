@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 
 //  Formik
@@ -12,6 +12,12 @@ import axios from 'axios';
 
 //  Google sign in
 import * as Google from 'expo-google-app-auth';
+
+//  async storage
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+//  Credentials Context
+import { CredentialsContext } from './../components/CredentialsContext';
 
 import {
     StyledContainer,
@@ -48,6 +54,9 @@ const Login = ({ navigation }) => {
     const [messageType, setMessageType] = useState();
     const [googleSubmitting, setGoogleSubmitting] = useState(false);
 
+//  Context
+    const {storedCredentials, setStoredCredentials } = useContext(CredentialsContext);
+
     const handleLogin = (credentials, setSubmitting) => {
         handleMessage(null);
         const url = 'http://10.0.2.2:3001/api/auth/singin';
@@ -59,8 +68,8 @@ const Login = ({ navigation }) => {
 
                 if (status !== 'SUCCESS') {
                     handleMessage(message, status);
-                } else {
-                    navigation.navigate('Welcome', { ...user});
+                } else {                    
+                    persitLogin({ ...user}, message, status);
                 }
                 setSubmitting(false);
             })
@@ -96,8 +105,7 @@ const Login = ({ navigation }) => {
 
                 if (type == 'success' ) {
                     const {email, name, phtoUrl} = user;
-                    handleMessage('Google signin successfull', 'SUCCESS');
-                    setTimeout(() => navigation.navigate('Welcome', {email, name, phtoUrl}), 1000);
+                    persitLogin({email, name, phtoUrl}, message, "SUCCESS");
                 } else {
                     handleMessage('Google sign up was canceled.');
                 }
@@ -107,6 +115,18 @@ const Login = ({ navigation }) => {
                 console.log(error);
                 handleMessage('An error occurred. Check your network and try again.');
                 setGoogleSubmitting(false);
+            })
+    }
+
+    const persitLogin = (credentials, message, status) => {
+        AsyncStorage.setItem('bookStoreCredentials', JSON.stringify(credentials))
+            .then(() => {
+                handleMessage(message, status);
+                setStoredCredentials(credentials);
+            })
+            .catch((error) => {
+                console.log(error);
+                handleMessage('Persisting login failed.');
             })
     }
 

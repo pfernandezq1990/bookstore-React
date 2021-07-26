@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 
 //  Formik
@@ -41,6 +41,12 @@ import KeyboardAvoidingWrapper from './../components/keyboardAvoidingWrapper';
 //  api cliente
 import axios from 'axios';
 
+//  async storage
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+//  Credentials Context
+import { CredentialsContext } from './../components/CredentialsContext';
+
 const Signup = ({navigation}) => {
     const [hidePassword, setHidePassword] = useState(true);
     const [show, setShow] = useState(false);
@@ -51,6 +57,9 @@ const Signup = ({navigation}) => {
 
     //  Actual date of birth to be set
     const [dob, setDob] = useState();
+
+    //  Context
+    const {storedCredentials, setStoredCredentials } = useContext(CredentialsContext);
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -76,7 +85,7 @@ const Signup = ({navigation}) => {
                 if (status !== 'SUCCESS') {
                     handleMessage(message, status);
                 } else {
-                    navigation.navigate('Welcome', { ...user});                    
+                    persitLogin({ ...user}, message, status);
                 }
                 setSubmitting(false);
             })
@@ -95,6 +104,18 @@ const Signup = ({navigation}) => {
     const handleMessage = (message, type = 'FAILED') => {
         setMesagge(message);
         setMessageType(type);
+    }
+
+    const persitLogin = (credentials, message, status) => {
+        AsyncStorage.setItem('bookStoreCredentials', JSON.stringify(credentials))
+            .then(() => {
+                handleMessage(message, status);
+                setStoredCredentials(credentials);
+            })
+            .catch((error) => {
+                console.log(error);
+                handleMessage('Persisting login failed.');
+            })
     }
 
     return (

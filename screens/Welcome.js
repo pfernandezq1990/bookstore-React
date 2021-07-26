@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { StatusBar } from 'expo-status-bar';
 
 import {
@@ -14,9 +14,28 @@ import {
     Avatar
 } from '../components/styles';
 
-const Welcome = ({navigation, route}) => {
-    const { username, email, photoUrl } = route.params;
+//  async storage
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+//  Credentials Context
+import { CredentialsContext } from './../components/CredentialsContext';
+
+const Welcome = () => {
+
+    //  Context
+    const {storedCredentials, setStoredCredentials } = useContext(CredentialsContext);
+    const { username, email, photoUrl } = storedCredentials;
     const AvatarImg = photoUrl ? {uri: photoUrl} : require('../assets/img/bookstorefondo.png');
+
+    const clearLogin = () => {
+        AsyncStorage
+            .removeItem('bookStoreCredentials')
+            .then(()  => {
+                setStoredCredentials('');
+            })
+            .catch( (error) => console.log(error))
+    }
+
     return (
         <>
             <StatusBar style='light' />
@@ -30,7 +49,7 @@ const Welcome = ({navigation, route}) => {
                     <StyledFormArea>
                         <Avatar resizeMode="cover" source={AvatarImg} />
                         <Line />
-                            <StyledButtom onPress={() => {navigation.navigate('Login')}}>
+                            <StyledButtom onPress={clearLogin}>
                                 <ButtomText>Logout</ButtomText>
                             </StyledButtom>                                              
                     </StyledFormArea>                  
