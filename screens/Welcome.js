@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 //  Credentials Context
 import { CredentialsContext } from './../components/CredentialsContext';
 
+
 const Welcome = () => {
 
     //  Context

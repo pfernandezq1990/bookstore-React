@@ -36,6 +36,12 @@ export const WelconmeContainer = styled(InnerContainer)`
     padding-top: 10px;
     justify-content: center;
 `;
+
+export const ProfileContainer = styled(InnerContainer)`
+    padding: 25px;
+    padding-top: 10px;
+    justify-content: center;
+`;
 export const PageLogo = styled.Image`
     width: 150px;
     height: 100px;

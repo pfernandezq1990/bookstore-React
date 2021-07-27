@@ -13,6 +13,7 @@ const {primary, tertiary} = Colors;
 import Login from '../screens/Loggin';
 import Signup from '../screens/Signup';
 import Welcome from '../screens/Welcome';
+import UserProfile from '../screens/pages/UserProfile'
 
 //#endregion
 
@@ -25,7 +26,6 @@ const RootStack = () => {
     return (
         <CredentialsContext.Consumer>
             { ({storedCredentials}) => (
-                <NavigationContainer>
                 <Stack.Navigator
                     screenOptions={{
                         headerStyle: {
@@ -49,11 +49,28 @@ const RootStack = () => {
                 }
                     
                 </Stack.Navigator>
-            </NavigationContainer>
             )}
         </CredentialsContext.Consumer>
         
     )
 }
 
-export default RootStack;
+const ProfileStack = () => {
+    return (
+        <CredentialsContext.Consumer>
+            { ({ storedCredentials }) => (
+                <Stack.Navigator>
+                    {storedCredentials ?
+                        <Stack.Screen name="Profile" component={UserProfile} />
+                        : <>
+                            <Stack.Screen name="Login" component={Login} />
+                            <Stack.Screen name="Signup" component={Signup} />
+                        </>
+                    }
+                </Stack.Navigator>
+            )}
+        </CredentialsContext.Consumer>                
+    )
+}
+
+export {RootStack, ProfileStack};

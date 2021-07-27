@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
 //  RootStack
-import RootStack from './navigators/RootStack';
+import { RootStack } from './navigators/RootStack';
 
 //  apploading
 import AppLoading from 'expo-app-loading';
@@ -11,6 +11,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //  Credentials Context
 import { CredentialsContext } from './components/CredentialsContext';
+
+//  Navigation Container
+import { NavigationContainer } from '@react-navigation/native';
+
+//   Drawer
+import MyDrawer from './navigators/drawer';
+
 
 
 export default function App() {
@@ -40,7 +47,9 @@ export default function App() {
   }
   return (
     <CredentialsContext.Provider value={{ storedCredentials, setStoredCredentials}}>
-      <RootStack />
+        <NavigationContainer>
+          <MyDrawer />
+        </NavigationContainer>
     </CredentialsContext.Provider>
   );
 }
